@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "declarative-migrations/declmig-e2e",
+  "mode": "stable-promotion-orchestrator",
+  "source_repository": "declarative-migrations/declarative-postgres-migrate.rs",
+  "source_pin_file": "pins/source.json",
+  "destructive_targets_allowed": false,
+  "production_credentials_allowed": false,
+  "test_evidence_required_before_release": true,
+  "evidence_producer": "declarative-migrations-test/declmig-e2e",
+  "required_jobs": [
+    "contract",
+    "postgres-smoke"
+  ]
+}
