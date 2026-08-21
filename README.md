@@ -12,7 +12,9 @@ The trust role is machine-enforced in `config/repository.json`:
 The `Declarative migrations promotion evidence` workflow has two required jobs:
 
 1. `contract` compiles and tests the verifier, rejects secret-like configuration, proves the repository is evidence-only, and checks that the local DPM source pin matches the independent evidence manifest.
-2. `test-evidence` reads the exact public test-organization workflow run and fails closed unless the repository, workflow ID/path, run attempt, event, head branch/SHA, four required jobs, source pin, artifact IDs/sizes/digests, and artifact expiry state all match `pins/test-evidence.json`.
+2. `test-evidence` reads the exact public test-organization workflow run and fails closed unless the repository, workflow ID/path, run attempt, event, head branch/SHA, five required jobs, source pin, artifact IDs/sizes/digests, and artifact expiry state all match `pins/test-evidence.json`.
+
+The five independently produced jobs are `contract`, `postgres-smoke`, `postgres-lease-invariant`, `cockroach-smoke`, and `dual-engine-parity`. The lease job executes the product’s live PostgreSQL lease contract and proves that a migration cannot execute the following statement after its session advisory lease is lost.
 
 Pull requests run in **candidate mode** and may pin a successful test-organization pull-request run so the verifier itself can be reviewed. Pushes to `main`, schedules, and manual release checks run in **release mode**; release mode accepts only a successful `push` run from the test repository’s `main` branch. A production PR therefore cannot be safely merged while its evidence manifest still names a test pull-request run.
 
