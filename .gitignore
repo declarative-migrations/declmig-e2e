@@ -10,3 +10,7 @@ __pycache__/
 .env.*
 !.env.example
 .DS_Store
+
+# Local temporary directories and Git worktrees (DEN-3956).
+tmp/
+temp/
