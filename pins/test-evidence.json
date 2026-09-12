@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "producer_repository": "declarative-migrations-test/declmig-e2e",
+  "workflow_id": 330642600,
+  "workflow_path": ".github/workflows/e2e.yml",
+  "run_id": 32499793831,
+  "run_attempt": 1,
+  "event": "pull_request",
+  "head_branch": "agent/dual-engine-e2e-hardening",
+  "head_sha": "5ad2a170e60c69396910a2ddd6c1bdd1e9256104",
+  "source_repository": "declarative-migrations/declarative-postgres-migrate.rs",
+  "source_pin_path": "pins/source.json",
+  "source_commit": "732a74d17ccf7fe5024dc803d35543e556df1f8b",
+  "required_jobs": [
+    "contract",
+    "postgres-smoke",
+    "postgres-lease-invariant",
+    "cockroach-smoke",
+    "dual-engine-parity"
+  ],
+  "artifacts": [
+    {
+      "id": 9453060907,
+      "name": "declmig-e2e-postgres-32499793831-1",
+      "size_in_bytes": 10865,
+      "digest": "sha256:80f4106f43f541d4c01bf948fc26b9436f059cd510086bea0170bb6e86c04315"
+    },
+    {
+      "id": 9453052886,
+      "name": "declmig-e2e-postgres-lease-32499793831-1",
+      "size_in_bytes": 531,
+      "digest": "sha256:81e9aae305ae437f61edbec61786707c555c75f5182e86ae0fc992991329e71e"
+    },
+    {
+      "id": 9453062893,
+      "name": "declmig-e2e-cockroach-32499793831-1",
+      "size_in_bytes": 7617,
+      "digest": "sha256:f419be2dab0fbd0c6b75a4dda0d78f3704ff0cc3527fdad120c94f3e537aef68"
+    },
+    {
+      "id": 9453070702,
+      "name": "declmig-e2e-dual-engine-32499793831-1",
+      "size_in_bytes": 638,
+      "digest": "sha256:3856ecc47aec9d27111d9a35349ab45b3ee895bedbc3880fdbf5e9368699a9c0"
+    }
+  ]
+}

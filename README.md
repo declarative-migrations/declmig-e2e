@@ -1,32 +1,42 @@
-# Declarative Migrations aggregate E2E
+# Declarative Migrations promotion E2E
 
-This repository certifies an exact `declarative-postgres-migrate.rs` source commit. Its trust role is declared in `config/repository.json`:
+This repository is the **production release-promotion verifier** for Declarative Migrations. It never creates, drops, migrates, or connects to a database. Destructive, failure-injection, engine, permission, recovery, and convergence tests belong to `declarative-migrations-test/declmig-e2e` and its focused scenario repositories, where every target must be ephemeral or explicitly disposable.
 
-- `declarative-migrations-test/declmig-e2e` coordinates candidate, destructive, failure-injection, engine, permission, and cross-repository conformance against ephemeral or explicitly disposable targets.
-- `declarative-migrations/declmig-e2e` consumes exact immutable test-org evidence and gates stable release promotion. It never owns destructive targets.
+The trust role is machine-enforced in `config/repository.json`:
 
-## Required first checks
+- `declarative-migrations-test/declmig-e2e` produces independent candidate evidence against PostgreSQL and CockroachDB.
+- `declarative-migrations/declmig-e2e` consumes one exact workflow run, exact job conclusions, an exact DPM source pin, and exact GitHub artifact SHA-256 digests before promotion.
 
-The `Declarative migrations aggregate E2E` workflow runs two required jobs:
+## Required checks
 
-1. `contract` validates the repository identity, mode, full source commit SHA, production-credential prohibition, fixtures, and configuration digests.
-2. `postgres-smoke` checks out that exact source revision, runs its library/property tests, builds the `dpm` binary, and performs a PostgreSQL `diff` → `verify` → `apply` → empty post-apply diff with live catalog assertions.
+The `Declarative migrations promotion evidence` workflow has two required jobs:
 
-Formatting and strict Clippy remain source-repository quality gates. The aggregate harness intentionally does not reformat an immutable historical tree with a newer moving formatter; source commits may be pinned only after their required source CI passes. This repository owns black-box integration and promotion evidence.
+1. `contract` compiles and tests the verifier, rejects secret-like configuration, proves the repository is evidence-only, and checks that the local DPM source pin matches the independent evidence manifest.
+2. `test-evidence` reads the exact public test-organization workflow run and fails closed unless the repository, workflow ID/path, run attempt, event, head branch/SHA, five required jobs, source pin, artifact IDs/sizes/digests, and artifact expiry state all match `pins/test-evidence.json`.
 
-Evidence is written under `artifacts/` and uploaded with exact source/workflow commits, the digest-pinned database engine identity, test/build logs, the `dpm` binary SHA-256, and migration artifact digests. Failure runs upload diagnostics separately and never masquerade as passing evidence. Generated evidence and checked-out source are ignored locally and must not be committed.
+The five independently produced jobs are `contract`, `postgres-smoke`, `postgres-lease-invariant`, `cockroach-smoke`, and `dual-engine-parity`. The lease job executes the product’s live PostgreSQL lease contract and proves that a migration cannot execute the following statement after its session advisory lease is lost.
 
-## Source updates
+Pull requests run in **candidate mode** and may pin a successful test-organization pull-request run so the verifier itself can be reviewed. Pushes to `main`, schedules, and manual release checks run in **release mode**; release mode accepts only a successful `push` run from the test repository’s `main` branch. A production PR therefore cannot be safely merged while its evidence manifest still names a test pull-request run.
 
-Update `pins/source.json` only through a pull request. `source_commit` must be a full lowercase 40-character commit SHA. Never replace it with a branch, tag, abbreviated SHA, or `latest` selector. A pin update must link the source repository’s successful required checks.
+## Pin updates
 
-## Trust boundaries
+`pins/source.json` and `pins/test-evidence.json` move together in one reviewed pull request.
 
-- Pull-request workflows receive no environment or cloud secrets.
-- Checkout credentials are not persisted.
-- GitHub Actions, the Rust toolchain, and the PostgreSQL service image are immutable pins.
-- The test repository may target only ephemeral or explicitly disposable databases and must reject production credentials/targets.
-- The production repository may consume only exact immutable evidence from the test aggregate.
-- Product service conformance requires one `*-lib-core` persistence authority, API-owned product writes, bounded database-enforced web reads, isolated web-state writes, migrator-only DDL, and Shared Auth without product-domain database ownership.
+- Every commit is a full lowercase 40-character SHA; mutable branches, tags, abbreviated SHAs, and `latest` selectors are forbidden.
+- The evidence manifest pins the producer repository, workflow, run/attempt, event, head branch/SHA, source commit, required job names, and each artifact’s immutable ID, byte size, and GitHub SHA-256 digest.
+- The producer’s `pins/source.json` is fetched at the exact workflow head SHA and must name the same DPM source commit.
+- Candidate evidence must be replaced by a successful test-main push run before production release promotion.
 
-See `config/repository.json`, `pins/source.json`, and `.github/workflows/e2e.yml` for the machine-enforced contract.
+## Product data-plane contract
+
+Product conformance uses one `*-lib-core` persistence authority, installed into API and web servers as the same immutable Zed package:
+
+- the API owns request-serving product reads/writes, authorization, invariants, transactions, idempotency, and audit/outbox behavior through `__api_rw`;
+- the web server receives bounded generated reads through `__web_ro` and sends product mutations through the generated API client;
+- web-owned session/PKCE/CSRF/cache state is isolated behind `__web_state_rw`;
+- a serialized one-shot `__migrator` owns declared DDL, backfills, catalog readback, and the migration ledger;
+- Shared Auth owns identity and session assurance, not product-domain authorization or database access.
+
+“Both web and API freely write product tables” is not the fleet default because it duplicates policy and invariant enforcement and expands the credential and audit boundary.
+
+See `config/repository.json`, `pins/source.json`, `pins/test-evidence.json`, `scripts/verify_test_evidence.py`, and `.github/workflows/e2e.yml` for the enforced contract.

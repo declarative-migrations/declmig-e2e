@@ -1,15 +1,19 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "repository": "declarative-migrations/declmig-e2e",
   "mode": "stable-promotion-orchestrator",
   "source_repository": "declarative-migrations/declarative-postgres-migrate.rs",
   "source_pin_file": "pins/source.json",
+  "evidence_producer": "declarative-migrations-test/declmig-e2e",
+  "evidence_pin_file": "pins/test-evidence.json",
   "destructive_targets_allowed": false,
+  "database_targets_allowed": false,
   "production_credentials_allowed": false,
   "test_evidence_required_before_release": true,
-  "evidence_producer": "declarative-migrations-test/declmig-e2e",
+  "candidate_pull_request_evidence_allowed": true,
+  "release_evidence_requires_main_push": true,
   "required_jobs": [
     "contract",
-    "postgres-smoke"
+    "test-evidence"
   ]
 }
