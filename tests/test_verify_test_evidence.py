@@ -165,7 +165,7 @@ class VerifyTestEvidenceTests(unittest.TestCase):
     def test_source_pin_base64_accepts_github_line_wrapping(self) -> None:
         fixture = EvidenceFixture()
         content = fixture.source_pin["content"]
-        fixture.source_pin["content"] = "\\n".join(
+        fixture.source_pin["content"] = chr(10).join(
             content[offset : offset + 60] for offset in range(0, len(content), 60)
         )
         decoded = verifier.decode_source_pin(fixture.source_pin)
