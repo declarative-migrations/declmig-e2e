@@ -138,6 +138,39 @@ class VerifyTestEvidenceTests(unittest.TestCase):
         with self.assertRaisesRegex(verifier.EvidenceError, "fork evidence is forbidden"):
             verifier.verify_evidence(fixture.manifest, "candidate", fixture.fetch)
 
+    def test_manifest_rejects_boolean_integer_identifiers(self) -> None:
+        fixture = EvidenceFixture()
+        for name in ("workflow_id", "run_id", "run_attempt"):
+            manifest = copy.deepcopy(fixture.manifest)
+            manifest[name] = True
+            with self.subTest(field=name):
+                with self.assertRaises(verifier.EvidenceError):
+                    verifier.validate_manifest(manifest)
+
+    def test_manifest_rejects_boolean_artifact_metadata(self) -> None:
+        fixture = EvidenceFixture()
+        for name in ("id", "size_in_bytes"):
+            manifest = copy.deepcopy(fixture.manifest)
+            manifest["artifacts"][0][name] = True
+            with self.subTest(field=name):
+                with self.assertRaises(verifier.EvidenceError):
+                    verifier.validate_manifest(manifest)
+
+    def test_source_pin_base64_rejects_trailing_invalid_bytes(self) -> None:
+        fixture = EvidenceFixture()
+        fixture.source_pin["content"] += "###"
+        with self.assertRaisesRegex(verifier.EvidenceError, "could not be decoded"):
+            verifier.decode_source_pin(fixture.source_pin)
+
+    def test_source_pin_base64_accepts_github_line_wrapping(self) -> None:
+        fixture = EvidenceFixture()
+        content = fixture.source_pin["content"]
+        fixture.source_pin["content"] = chr(10).join(
+            content[offset : offset + 60] for offset in range(0, len(content), 60)
+        )
+        decoded = verifier.decode_source_pin(fixture.source_pin)
+        self.assertEqual(decoded["source_commit"], fixture.manifest["source_commit"])
+
 
 if __name__ == "__main__":
     unittest.main()

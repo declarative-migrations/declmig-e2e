@@ -94,15 +94,15 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
         "unexpected source pin path",
     )
     require(
-        isinstance(manifest["workflow_id"], int) and manifest["workflow_id"] > 0,
+        type(manifest["workflow_id"]) is int and manifest["workflow_id"] > 0,
         "workflow_id must be positive",
     )
     require(
-        isinstance(manifest["run_id"], int) and manifest["run_id"] > 0,
+        type(manifest["run_id"]) is int and manifest["run_id"] > 0,
         "run_id must be positive",
     )
     require(
-        isinstance(manifest["run_attempt"], int)
+        type(manifest["run_attempt"]) is int
         and manifest["run_attempt"] > 0,
         "run_attempt must be positive",
     )
@@ -150,7 +150,7 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
             f"artifact {index}",
         )
         require(
-            isinstance(artifact["id"], int) and artifact["id"] > 0,
+            type(artifact["id"]) is int and artifact["id"] > 0,
             f"artifact {index} id must be positive",
         )
         require(
@@ -158,7 +158,7 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
             f"artifact {index} name must be text",
         )
         require(
-            isinstance(artifact["size_in_bytes"], int)
+            type(artifact["size_in_bytes"]) is int
             and artifact["size_in_bytes"] > 0,
             f"artifact {index} size must be positive",
         )
@@ -221,7 +221,7 @@ def decode_source_pin(payload: Any) -> dict[str, Any]:
     content = payload.get("content")
     require(isinstance(content, str), "source pin response is missing content")
     try:
-        decoded = base64.b64decode(content, validate=False)
+        decoded = base64.b64decode("".join(content.split()), validate=True)
         pin = json.loads(decoded)
     except (ValueError, json.JSONDecodeError) as exc:
         raise EvidenceError("source pin response could not be decoded") from exc
